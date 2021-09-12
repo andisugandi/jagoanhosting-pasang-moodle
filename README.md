@@ -2,7 +2,7 @@
 
 DSDP 3 - Cara Instalasi Moodle di VPS/Server Melalui Cara Manual
 
-Berkas presentasinya dapat diperoleh di: [jagoanhosting-pasang-moodle.pdf](https://github.com/vegasbrianc/docker-traefik-prometheus/blob/master/jagoanhosting-pasang-moodle.pdf).
+Berkas presentasinya dapat diperoleh di: [jagoanhosting-pasang-moodle.pdf](https://github.com/andisugandi/jagoanhosting-pasang-moodle/blob/master/jagoanhosting-pasang-moodle.pdf).
 
 ## Manakah yang Terbaik?
 
