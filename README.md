@@ -1,6 +1,6 @@
-# Cara Konvensional v.s Kontainer dalam Memasang Moodle
+# Memasang Moodle dengan Cara Konvensional dan Berbasis Kontainer 
 
-DSDP 3 - Cara Instalasi Moodle di VPS/Server Melalui Cara Manual
+Tulisan ini dalam rangka mendukung kegiatan [Workshop Digital School Development Program (DSDP) #03: Memasang Moodle dengan Cara Konvensional  dan Berbasis Kontainer](https://www.instagram.com/p/CStimZMhhyN/).
 
 Berkas presentasinya dapat diperoleh di: [jagoanhosting-pasang-moodle.pdf](https://github.com/andisugandi/jagoanhosting-pasang-moodle/blob/master/jagoanhosting-pasang-moodle.pdf).
 
@@ -16,7 +16,7 @@ Berkas presentasinya dapat diperoleh di: [jagoanhosting-pasang-moodle.pdf](https
 **1. Sediakan Server (VPS).**
 
 - Pasang VPS sesuai keinginan.
-- Dalam tutorial ini, penulis menggunakan Linux CentOS 7.
+- Dalam tutorial ini, penulis menggunakan Linux [CentOS 7](https://wiki.centos.org/action/show/Manuals/ReleaseNotes/CentOS7.2009): `CentOS Linux release 7.9.2009 (Core)`.
 - Sebagai awal, kita pastikan *firewall* sudah dipasang dan diatur dengan tepat:
   ~~~bash
   $ sudo yum install firewalld
@@ -130,23 +130,27 @@ Berkas presentasinya dapat diperoleh di: [jagoanhosting-pasang-moodle.pdf](https
   $ sudo vim /etc/my.cnf.d/server.cnf
   ~~~
 
-  Sesuaikan isi `[mariadb]` menjadi seperti berikut::
+  Sesuaikan isi `[mariadb]` menjadi seperti berikut:
 
   ~~~bash
   [mariadb]
-  name = MariaDB
-  baseurl = http://yum.mariadb.org/10.5/centos7-amd64
-  gpgkey = https://yum.mariadb.org/RPM-GPG-KEY-MariaDB
-  gpgcheck=1
+  innodb_file_per_table = 1
+  character-set-server = utf8mb4
+  collation-server = utf8mb4_unicode_ci
+  skip-character-set-client-handshake
   ~~~
 
   ~~~bash
   $ sudo systemctl enable --now mariadb
   ~~~
 
+  Lakukan instruksi berikut agar akun `root` dapat memiliki kata kunci saat menggunakan `shell` layanan basis data:
+
   ~~~bash
   $ sudo mysql_secure_installation
   ~~~
+
+  Selanjutnya akses `shell` layanannya untuk membuat basis data yang nanti digunakan oleh Moodle:
 
   ~~~bash
   $ mysql -u root -p
@@ -184,7 +188,7 @@ $ sudo chown apache:apache -R /var/www/html/moodle /var/moodledata
 $ sudo chmod 777 /var/moodledata
 ~~~
 
-Untuk distro Linux turunan Red Hat, terutama yang mengaktifkan fitur `SELinux`, hak Akses baca-tulis ke direktori Moodle oleh web server harus didefinisikan dengan tepat:
+Untuk distro Linux turunan Red Hat, terutama yang mengaktifkan fitur `SELinux`, hak akses baca-tulis ke direktori Moodle oleh web server harus didefinisikan dengan tepat:
 
 ~~~bash
 $ sudo semanage fcontext -at httpd_sys_rw_content_t '/var/www/moodle(/.*)?'
@@ -216,6 +220,7 @@ Pada layanan web berbasis kontainer, *listen* port nomor: `80` dan `443` akan di
 **1. Sediakan Server (VPS).**
 
 - Pasang VPS sesuai keinginan.
+- Dalam tutorial ini, penulis menggunakan Linux [CentOS 7](https://wiki.centos.org/action/show/Manuals/ReleaseNotes/CentOS7.2009): `CentOS Linux release 7.9.2009 (Core)`.
 - Pastikan tidak ada layanan web dan basis data yang sedang berjalan:
 
   ~~~bash
