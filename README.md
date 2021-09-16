@@ -19,11 +19,11 @@ Berkas presentasinya dapat diperoleh di: [jagoanhosting-pasang-moodle.pdf](https
 - Dalam tutorial ini, penulis menggunakan Linux [CentOS 7](https://wiki.centos.org/action/show/Manuals/ReleaseNotes/CentOS7.2009): `CentOS Linux release 7.9.2009 (Core)`.
 - Sebagai awal, kita pastikan *firewall* sudah dipasang dan diatur dengan tepat:
   ~~~bash
-  $ sudo yum install firewalld
-  $ sudo systemctl enable --now firewalld
-  $ sudo firewall-cmd --permanent --add-interface=eth0 --zone=public
-  $ sudo firewall-cmd --reload
-  $ sudo firewall-cmd --list-all --zone=public
+  sudo yum install firewalld
+  sudo systemctl enable --now firewalld
+  sudo firewall-cmd --permanent --add-interface=eth0 --zone=public
+  sudo firewall-cmd --reload
+  sudo firewall-cmd --list-all --zone=public
   ~~~
 
 **2. Pasang Paket.**
@@ -31,40 +31,44 @@ Berkas presentasinya dapat diperoleh di: [jagoanhosting-pasang-moodle.pdf](https
 - **Web Server**
 
   ~~~bash
-  $ sudo yum update
-  $ sudo yum install httpd httpd-tools
-  $ sudo systemctl enable --now httpd
-  $ sudo systemctl status httpd
+  sudo yum update
+  sudo yum install httpd httpd-tools
+  sudo systemctl enable --now httpd
+  sudo systemctl status httpd
   ~~~
 
   ~~~bash
-  $ sudo firewall-cmd --permanent --add-service={http,https} --zone=public
-  $ sudo firewall-cmd --reload
-  $ sudo firewall-cmd --list-all --zone=public
+  sudo firewall-cmd --permanent --add-service={http,https} --zone=public
+  sudo firewall-cmd --reload
+  sudo firewall-cmd --list-all --zone=public
   ~~~
 - **Modul PHP**
 
   ~~~bash
-  $ sudo rpm -Uvh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
-  $ sudo rpm -Uvh http://rpms.remirepo.net/enterprise/remi-release-7.rpm
+  sudo rpm -Uvh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+  sudo rpm -Uvh http://rpms.remirepo.net/enterprise/remi-release-7.rpm
   ~~~
 
   ~~~bash
-  $ sudo yum-config-manager --enable remi-php74
-  $ sudo yum install php php-fpm php-cli php-pspell php-curl php-gd php-intl php-mysqlnd php-xml php-xmlrpc php-ldap php-zip php-json php-soap php-opcache php-readline php-mbstring php-sodium
+  sudo yum-config-manager --enable remi-php74
+  sudo yum install php php-fpm php-cli php-pspell php-curl php-gd php-intl php-mysqlnd php-xml php-xmlrpc php-ldap php-zip php-json php-soap php-opcache php-readline php-mbstring php-sodium
   ~~~
 
   ~~~bash
-  $ sudo echo '<?php phpinfo(); ?>' > /var/www/html/info.php
+  sudo echo '<?php phpinfo(); ?>' > /var/www/html/info.php
   ~~~
 
   ~~~bash
-  $ sudo systemctl restart httpd
+  sudo systemctl restart httpd
   ~~~
 - **Basis Data**
 
+  Tambahkan berkas repositori baru `MariaDB.repo`, dengan menggunakan penyunting teks yang biasa anda gunakan (mungkin `nano`?).
+  
+  Saya menggunakan `vim`. Pasang paketnya jika belum: `sudo yum install vim` .
+
   ~~~bash
-  $ sudo vim /etc/yum.repos.d/MariaDB.repo
+  sudo vim /etc/yum.repos.d/MariaDB.repo
   ~~~
 
   Isinya:
@@ -78,7 +82,7 @@ Berkas presentasinya dapat diperoleh di: [jagoanhosting-pasang-moodle.pdf](https
   ~~~
 
   ~~~bash
-  $ sudo yum install MariaDB-server MariaDB-client
+  sudo yum install MariaDB-server MariaDB-client
   ~~~
 
 **3. Konfigurasi.**
@@ -86,7 +90,7 @@ Berkas presentasinya dapat diperoleh di: [jagoanhosting-pasang-moodle.pdf](https
 - **Web Server**
 
   ~~~bash
-  $ sudo vim /etc/httpd/conf.d/web1.namasekolah.com.conf
+  sudo vim /etc/httpd/conf.d/web1.namasekolah.com.conf
   ~~~
 
   isinya:
@@ -107,12 +111,12 @@ Berkas presentasinya dapat diperoleh di: [jagoanhosting-pasang-moodle.pdf](https
   ~~~
 
   ~~~bash
-  $ sudo systemctl reload httpd
+  sudo systemctl reload httpd
   ~~~
 - **Modul PHP**
 
   ~~~bash
-  $ sudo vim /etc/php.ini
+  sudo vim /etc/php.ini
   ~~~
 
   Ubah nilai baris `max_input_vars` sehingga berisi nilai: `10000`.
@@ -122,12 +126,12 @@ Berkas presentasinya dapat diperoleh di: [jagoanhosting-pasang-moodle.pdf](https
   ~~~
 
   ~~~bash
-  $ sudo systemctl restart httpd
+  sudo systemctl restart httpd
   ~~~
 - **Basis Data**
 
   ~~~bash
-  $ sudo vim /etc/my.cnf.d/server.cnf
+  sudo vim /etc/my.cnf.d/server.cnf
   ~~~
 
   Sesuaikan isi `[mariadb]` menjadi seperti berikut:
@@ -141,25 +145,29 @@ Berkas presentasinya dapat diperoleh di: [jagoanhosting-pasang-moodle.pdf](https
   ~~~
 
   ~~~bash
-  $ sudo systemctl enable --now mariadb
+  sudo systemctl enable --now mariadb
   ~~~
 
   Lakukan instruksi berikut agar akun `root` dapat memiliki kata kunci saat menggunakan `shell` layanan basis data:
 
   ~~~bash
-  $ sudo mysql_secure_installation
+  sudo mysql_secure_installation
   ~~~
 
-  Selanjutnya akses `shell` layanannya untuk membuat basis data yang nanti digunakan oleh Moodle:
+  Selanjutnya akses `shell` layanan MySQL:
 
   ~~~bash
-  $ mysql -u root -p
+  mysql -u root -p
   ~~~
+  
+  Membuat basis data yang nanti digunakan oleh Moodle:
 
   ~~~mysql
-  > CREATE DATABASE moodledb DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-  > CREATE USER 'moodleuser'@'localhost' IDENTIFIED BY 't4ny4adm1n';
-  > GRANT ALL ON moodledb.* TO 'moodleuser'@'localhost';
+  CREATE DATABASE moodledb DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+  CREATE USER 'moodleuser'@'localhost' IDENTIFIED BY 't4ny4adm1n';
+  GRANT ALL ON moodledb.* TO 'moodleuser'@'localhost';
+  FLUSH PRIVILEGES;
+  EXIT;
   ~~~
 
 **4. Unduh Kode Moodle.**
@@ -167,45 +175,48 @@ Berkas presentasinya dapat diperoleh di: [jagoanhosting-pasang-moodle.pdf](https
 Duplikasi kode Moodle menggunakan Git:
 
 ~~~bash
-$ sudo yum install git
-$ cd /var/www/html
-$ sudo git clone https://github.com/moodle/moodle.git
+sudo yum install git
+cd /var/www/html
+sudo git clone https://github.com/moodle/moodle.git
 ~~~
 
 Memilih Versi Moodle:
 
 ~~~bash
-$ cd moodle
-$ sudo git branch --track MOODLE_311_STABLE origin/MOODLE_311_STABLE
-$ sudo git checkout MOODLE_311_STABLE
-$ sudo mkdir /var/moodledata
+cd moodle
+sudo git branch --track MOODLE_311_STABLE origin/MOODLE_311_STABLE
+sudo git checkout MOODLE_311_STABLE
+sudo mkdir /var/moodledata
 ~~~
 
 Pastikan kepemilikian Kode Web Moodle oleh akun web werver (`apache`):
 
 ~~~bash
-$ sudo chown apache:apache -R /var/www/html/moodle /var/moodledata
-$ sudo chmod 777 /var/moodledata
+sudo chown apache:apache -R /var/www/html/moodle /var/moodledata
+sudo chmod 777 /var/moodledata
 ~~~
 
 Untuk distro Linux turunan Red Hat, terutama yang mengaktifkan fitur `SELinux`, hak akses baca-tulis ke direktori Moodle oleh web server harus didefinisikan dengan tepat:
 
 ~~~bash
-$ sudo semanage fcontext -at httpd_sys_rw_content_t '/var/www/moodle(/.*)?'
-$ sudo restorecon -Rv '/var/www/moodle/'
-$ sudo semanage fcontext -at httpd_sys_rw_content_t '/var/moodledata(/.*)?'
-$ sudo restorecon -Rv '/var/moodledata/'
+sudo semanage fcontext -at httpd_sys_rw_content_t '/var/www/moodle(/.*)?'
+sudo restorecon -Rv '/var/www/moodle/'
+sudo semanage fcontext -at httpd_sys_rw_content_t '/var/moodledata(/.*)?'
+sudo restorecon -Rv '/var/moodledata/'
 ~~~
 
 **5. Pasang Sertifikat SSL/TLS.**
 
 ~~~bash
-$ sudo yum install certbot mod_ssl python2-certbot-apache
-$ sudo certbot --apache
+sudo yum install certbot mod_ssl python2-certbot-apache
+sudo certbot --apache
 ~~~
 
-6. Pasang (*Deploy*) Moodle di VPS *via* Web-Installer.
-7. Optimasi (jika perlu).
+**6. Pasang (*Deploy*) Moodle di VPS *via* Web-Installer.**
+
+- Isi kolom kredensial yang diminta dengan data yang bersesuaian (nama basis data, akun pengaksesnya, beserta kata kunci akun tersebut).
+
+**7. Optimasi (jika perlu).**
 
 ---
 
@@ -224,22 +235,22 @@ Pada layanan web berbasis kontainer, *listen* port nomor: `80` dan `443` akan di
 - Pastikan tidak ada layanan web dan basis data yang sedang berjalan:
 
   ~~~bash
-  $ sudo systemctl stop httpd
-  $ sudo systemctl stop mariadb
+  sudo systemctl stop httpd
+  sudo systemctl stop mariadb
   ~~~
 - Jangan lupa, juga pastikan tidak ada paket web server (misal: `httpd`) dan basis data yang terpasang:
 
   ~~~bash
-  $ sudo yum remove httpd MariaDB-server MariaDB-client
+  sudo yum remove httpd MariaDB-server MariaDB-client
   ~~~
 - Selanjutnya (jika belum), pasang dan atur *firewall* dengan tepat:
 
   ~~~bash
-  $ sudo yum install firewalld
-  $ sudo systemctl enable --now firewalld
-  $ sudo firewall-cmd --permanent --add-interface=eth0 --zone=public
-  $ sudo firewall-cmd --reload
-  $ sudo firewall-cmd --list-all --zone=public
+  sudo yum install firewalld
+  sudo systemctl enable --now firewalld
+  sudo firewall-cmd --permanent --add-interface=eth0 --zone=public
+  sudo firewall-cmd --reload
+  sudo firewall-cmd --list-all --zone=public
   ~~~
 
 **2. Pasang Mesin Kontainer (Docker) + Docker Compose.**
@@ -247,22 +258,22 @@ Pada layanan web berbasis kontainer, *listen* port nomor: `80` dan `443` akan di
 - Pastikan paket Docker versi bawaan dihapus terlebih dahulu:
 
   ~~~bash
-  $ sudo yum remove docker docker-client docker-client-latest docker-common docker-latest docker-latest-logrotate docker-logrotate docker-engine
+  sudo yum remove docker docker-client docker-client-latest docker-common docker-latest docker-latest-logrotate docker-logrotate docker-engine
   ~~~
 
 - Tambahkan repositori resmi Docker, lalu pasang paketnya:
 
   ~~~bash
-  $ sudo yum install yum-utils
-  $ sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
-  $ sudo yum install docker-ce docker-ce-cli containerd.io
+  sudo yum install yum-utils
+  sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+  sudo yum install docker-ce docker-ce-cli containerd.io
   ~~~
 
 - Jalankan layanan Docker, lalu tambahkan akun yang kita gunakan ke group `docker`:
 
   ~~~bash
-  $ sudo systemctl enable --now docker
-  $ sudo usermod -aG docker $USER
+  sudo systemctl enable --now docker
+  sudo usermod -aG docker $USER
   ~~~
 
 Lakukan *logout*, lalu *login* kembali.
@@ -270,17 +281,17 @@ Lakukan *logout*, lalu *login* kembali.
 - Selanjutnya pasang Docker Compose:
 
   ~~~bash
-  $ sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-  $ sudo chmod +x /usr/local/bin/docker-compose
-  $ sudo ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
-  $ sudo systemctl restart docker
+  sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+  sudo chmod +x /usr/local/bin/docker-compose
+  sudo ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
+  sudo systemctl restart docker
   ~~~
 
 - Akhirnya periksa apakah binari Docker dan Docker Compose sudah bisa dijalankan:
 
   ~~~bash
-  $ docker --version
-  $ docker-compose --version
+  docker --version
+  docker-compose --version
   ~~~
 
 **3. Konfigurasi Load Balancer & Sertifikat SSL/TLS via Traefik.**
@@ -288,13 +299,13 @@ Lakukan *logout*, lalu *login* kembali.
 - Persiapkan susunan berkas dan direktori yang diperlukan:
 
   ~~~bash
-  $ mkdir ~/traefik && cd ~/traefik
-  $ mkdir -p data/configuration
-  $ touch docker-compose.yml
-  $ touch data/acme.json
-  $ touch data/configuration/dynamic.yml
-  $ touch data/traefik.yml
-  $ chmod 600 data/acme.json
+  mkdir ~/traefik && cd ~/traefik
+  mkdir -p data/configuration
+  touch docker-compose.yml
+  touch data/acme.json
+  touch data/configuration/dynamic.yml
+  touch data/traefik.yml
+  chmod 600 data/acme.json
   ~~~
 
   ~~~bash
@@ -312,7 +323,7 @@ Lakukan *logout*, lalu *login* kembali.
 - Buatkan kata kunci untuk login akun `admin` Traefik agar dapat mengakses Dashboard Traefik:
 
   ~~~bash
-  $ htpasswd -nb admin passwordUntukAkunAdminTrafik
+  htpasswd -nb admin passwordUntukAkunAdminTrafik
   ~~~
 
   Hasilnya keluarannya misal seperti ini:
@@ -453,15 +464,15 @@ Simpan untuk nanti digunakan di berkas `data/configuration/dynamic.yml`.
 - Jangan lupa untuk membuatkan Docker Network: `proxy` terlebih dahulu:
 
   ~~~bash
-  $ docker network create proxy
+  docker network create proxy
   ~~~
 
 **4. Konfigurasi *Image* Moodle (Persistent Volume Moodle, moodledata, MariaDB).**
 - Siapkan direktori Moodle & buat berkas `docker-compose.yml` di dalamnya:
 
   ~~~bash
-  $ mkdir ~/moodle && cd ~/moodle
-  $ vim docker-compose.yml
+  mkdir ~/moodle && cd ~/moodle
+  vim docker-compose.yml
   ~~~
 
   Berikut isi berkas `docker-compose.yml`:
@@ -537,19 +548,19 @@ Simpan untuk nanti digunakan di berkas `data/configuration/dynamic.yml`.
 
 **5. Jalankan Kontainer Traefik.**
 
-  - Pastikan berada di dalam direktori `traefik`, lalu jalankan `docker-compose`:
+  - Pastikan sedang berada di dalam direktori `traefik`, lalu jalankan perintah `docker-compose`:
     ~~~bash
-    $ cd ~/traefik
-    $ docker-compose up -d
+    cd ~/traefik
+    docker-compose up -d
     ~~~
 
 **6. Jalankan Kontainer Moodle.**
 
-- Pastikan berada di dalam direktori `moodle`, lalu jalankan `docker-compose`:
+- Pastikan sedang berada di dalam direktori `moodle`, lalu jalankan perintah `docker-compose`:
 
     ~~~bash
-    $ cd ~/moodle
-    $ docker-compose up -d
+    cd ~/moodle
+    docker-compose up -d
     ~~~
 
 **7. Optimasi (jika perlu).**
