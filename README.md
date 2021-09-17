@@ -300,10 +300,10 @@ Lakukan *logout*, lalu *login* kembali.
 
   ~~~bash
   mkdir ~/traefik && cd ~/traefik
-  mkdir -p data/configuration
+  mkdir -p data/configurations
   touch docker-compose.yml
   touch data/acme.json
-  touch data/configuration/dynamic.yml
+  touch data/configurations/dynamic.yml
   touch data/traefik.yml
   chmod 600 data/acme.json
   ~~~
@@ -332,7 +332,7 @@ Lakukan *logout*, lalu *login* kembali.
   admin:$apr1$karakteracakpunyaandamestinyaberbedadanunik
   ~~~
 
-Simpan untuk nanti digunakan di berkas `data/configuration/dynamic.yml`.
+Simpan untuk nanti digunakan di berkas `data/configurations/dynamic.yml`.
 
 - Isi berkas `docker-compose.yml`:
 
@@ -375,7 +375,7 @@ Simpan untuk nanti digunakan di berkas `data/configuration/dynamic.yml`.
 
   ~~~yml
   api:
-  dashboard: true
+    dashboard: true
 
   entryPoints:
     web:
